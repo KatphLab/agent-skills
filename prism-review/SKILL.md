@@ -35,7 +35,6 @@ Create and use this structure under the resolved repository/worktree root:
   review-context.json     # manifest: repo, issue, PR, branch, SHAs, spec metadata
   issue.json
   pr.json
-  pr-comments.txt
   changed-files.txt
   spec/
     spec-manifest.json    # source URL, filename, sha256, issue, PR, download time
@@ -100,7 +99,7 @@ gh auth status -R "$GH_REPO" || halt "gh is not authenticated for $GH_REPO"
 
 Do not proceed until the repository identity is resolved and `gh` is confirmed authenticated.
 
-### 1. Resolve issue, PR, and branch
+### 1. Resolve issue and verify branch
 
 1. Fetch issue details and save as validated JSON:
 
@@ -111,55 +110,12 @@ python3 -m json.tool .pi/review/issue.json.tmp > /dev/null && mv .pi/review/issu
 
 If the temp file is empty or invalid JSON, halt and report the `gh` error.
 
-2. Identify the related PR using this discovery order (stop at first confident match):
-   a. PR links in the issue body (look for `github.com/.../pull/NNN`).
-   b. PR links in issue comments.
-   c. GitHub closing references via API: `gh -R "$GH_REPO" issue view <ISSUE_NUMBER> --json timelineItems`.
-   d. Branch references from issue labels/body/comments.
-   e. Search: `gh -R "$GH_REPO" pr list --state all --search "<ISSUE_NUMBER>" --json number,title,url,state,headRefName,headRepository,baseRefName,body`.
-
-If multiple plausible PRs exist, present each candidate with the evidence source and ask the user which one to review. Do not guess.
-
-3. Save PR details as validated JSON:
-
-```bash
-gh -R "$GH_REPO" pr view <PR_NUMBER> --json number,title,url,state,headRefName,headRefOid,headRepository,baseRefName,baseRefOid,body,files,commits > .pi/review/pr.json.tmp
-python3 -m json.tool .pi/review/pr.json.tmp > /dev/null && mv .pi/review/pr.json.tmp .pi/review/pr.json
-```
-
-4. Fetch PR comments and review comments (spec links may live in discussion, not just the PR body):
-
-```bash
-gh -R "$GH_REPO" pr view <PR_NUMBER> --comments > .pi/review/pr-comments.txt
-if [ ! -s .pi/review/pr-comments.txt ]; then halt "PR comments are empty"; fi
-```
-
-This saves as `.txt` since `gh pr view --comments` outputs markdown, not JSON.
-
-5. Save the list of changed files from the PR diff:
-
-```bash
-gh -R "$GH_REPO" pr diff <PR_NUMBER> --name-only > .pi/review/changed-files.txt
-```
-
-6. Extract the branch name (`headRefName`), PR head SHA (`headRefOid`), and base SHA (`baseRefOid`) from `pr.json`.
-
-If no related PR or branch can be found, halt and report what was checked.
-
-### 2. Verify the current worktree matches the PR branch and head commit
-
-Do not switch worktrees or create a new one. The review must happen in the worktree that already matches the PR branch.
-
-1. Get the current branch and HEAD SHA:
+2. Get the current branch and HEAD SHA:
 
 ```bash
 CURRENT_BRANCH=$(git rev-parse --abbrev-ref HEAD)
 CURRENT_HEAD=$(git rev-parse HEAD)
 ```
-
-2. Compare against `pr.json`:
-   - If `CURRENT_BRANCH` is `HEAD` (detached HEAD state), skip the branch name check and only verify `CURRENT_HEAD` equals `headRefOid`. Note the detached state in the review notes.
-   - Otherwise, `CURRENT_BRANCH` must equal `headRefName` AND `CURRENT_HEAD` must equal `headRefOid`.
 
 3. Check for a dirty working tree:
 
@@ -169,10 +125,11 @@ git status --porcelain
 
 If dirty, report the uncommitted changes and ask the user to stash or commit before re-running. Do not proceed with a dirty tree — line numbers in findings will be unreliable.
 
-4. If branch or HEAD SHA mismatch, halt and report:
-   - Current branch: `<current-branch>`, expected: `<headRefName>`
-   - Current HEAD: `<current-head>`, expected: `<headRefOid>`
-   - Ask the user to switch to the correct worktree and re-run the skill.
+4. Verify the branch aligns with the issue:
+   - If `CURRENT_BRANCH` is `HEAD` (detached HEAD state), warn the user and ask them to check out the feature branch for this issue before proceeding.
+   - Otherwise, confirm with the user that `CURRENT_BRANCH` is the correct branch for issue #<ISSUE_NUMBER>. If the issue body or title references a branch name, verify it matches.
+
+If the user confirms the branch is wrong, halt and ask them to switch to the correct branch and re-run.
 
 Do not review code from the wrong branch or commit. Do not attempt to switch branches or create new worktrees.
 
