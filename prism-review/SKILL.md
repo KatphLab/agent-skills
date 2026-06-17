@@ -265,12 +265,16 @@ Prepare a concise context packet for subagents:
 - Relevant changed files from `.pi/review/changed-files.txt` (verify each file exists locally; report missing files)
 - Instruction to produce only spec-vs-code findings with spec sections and code references
 
-### 5. Run two independent logic reviews
+### 5. Run two parallel logic reviews
 
-Spawn two `logic-reviewer` subagents against the same module and spec context:
+Spawn two `logic-reviewer` subagents against the same module and spec context, but keep their work independent:
 
 1. One high-complexity review.
 2. One medium-complexity review.
+
+Launch both in the same parallel subagent call. Do not run one first, wait for its files, then start the other; that lets the later reviewer see the earlier review and defeats independence.
+
+Build two role-specific task packets. Each packet may include only the shared context packet, spec text paths, relevant code paths, and that subagent's own output paths. Do not include the other reviewer's output directory, coverage file, findings, or summary in the task packet.
 
 Ask each logic reviewer to compare implementation against the spec and write one markdown file per finding.
 
@@ -294,10 +298,13 @@ rm -f .pi/review/logic-findings-high/*.md .pi/review/logic-findings-medium/*.md
 rm -f .pi/review/logic-findings-high-coverage.md .pi/review/logic-findings-medium-coverage.md
 ```
 
-Also require each logic reviewer to produce a spec coverage checklist alongside its findings:
+Also require each logic reviewer to produce a spec coverage checklist alongside its findings. Give each reviewer only its own coverage path:
 
 ```text
+# high-complexity reviewer only
 .pi/review/logic-findings-high-coverage.md
+
+# medium-complexity reviewer only
 .pi/review/logic-findings-medium-coverage.md
 ```
 
@@ -349,6 +356,15 @@ Each finding file should use this structure:
 ```
 
 Tell subagents not to create aggregate summaries in the findings folders; one file per finding keeps the next review step clean.
+
+Independence guardrail for each logic-reviewer prompt:
+
+- Treat the other reviewer's artifacts as forbidden input, not context.
+- Do not read, list, grep, summarize, or compare against `.pi/review/logic-findings-high/`, `.pi/review/logic-findings-medium/`, `.pi/review/logic-findings-high-coverage.md`, or `.pi/review/logic-findings-medium-coverage.md`, except for your own assigned output directory/coverage file when writing results.
+- If you accidentally see another reviewer's finding or coverage file, ignore it and state this in your completion note.
+- Base findings only on the issue/PR context, spec text, changed-file list, and code files.
+
+This independence only applies to the two logic-reviewer passes. The later reviewer pass intentionally reads both sets of validated findings.
 
 ### 6. Validate subagent outputs and run reviewer pass
 
