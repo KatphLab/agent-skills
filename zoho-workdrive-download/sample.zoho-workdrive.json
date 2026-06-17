@@ -1,0 +1,13 @@
+{
+  "_comment_initial": "=== INITIAL SETUP: provide these 3 fields ===",
+  "client_id": "1000.YOUR_CLIENT_ID_HERE",
+  "client_secret": "your_client_secret_here",
+  "code": "1000.generate_from_api_console",
+
+  "_comment_after_run": "=== AFTER FIRST RUN: tokens are auto-added below ===",
+  "_comment_auto_fields": "Remove access_token/refresh_token/token_expiry/accounts_url when adding a fresh code",
+  "access_token": "1000.auto_generated_will_appear_here",
+  "refresh_token": "1000.auto_generated_will_appear_here",
+  "token_expiry": 1750000000,
+  "accounts_url": "https://accounts.zoho.in"
+}
