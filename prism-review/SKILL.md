@@ -7,7 +7,7 @@ description: Execute a GitHub issue-driven specification review workflow. Use th
 
 Use this skill to turn a GitHub issue number into a structured single-module review of the related PR/branch against the specification documents linked from the issue.
 
-The goal is not a general code review. The goal is to verify whether the implementation matches the spec: workflows, formulas, thresholds, states, edge cases, validation rules, side effects, and output schemas. Keep all findings traceable to both the spec and code.
+The goal is not a general code review. The goal is to verify whether the implementation matches the spec: workflows, formulas, thresholds, states, edge cases, validation rules, side effects, and output schemas. Keep all findings traceable to both the spec and code. Explicitly look for requirements that appear in the spec but are missing or only partially implemented in code; absence is a valid finding when supported by spec details and code search evidence.
 
 ## Inputs
 
@@ -221,6 +221,8 @@ Prepare a concise context packet for subagents:
 - Spec text file paths
 - Relevant changed files from `.pi/review/changed-files.txt` (verify each file exists locally; report missing files)
 - Instruction to produce only spec-vs-code findings with spec sections and code references
+- Instruction to actively identify spec requirements that are missing from the implementation, not only mismatches in existing code
+- Instruction that every code line reference must be validated against the current checkout immediately before writing the finding
 
 ### 5. Run two parallel logic reviews
 
@@ -267,7 +269,8 @@ Also require each logic reviewer to produce a spec coverage checklist alongside 
 
 The coverage checklist should list every major spec section/requirement considered, with one of:
 
-- `COVERED — finding file: <filename>` (a discrepancy was found)
+- `COVERED — finding file: <filename>` (a discrepancy was found in existing implementation)
+- `NOT_IMPLEMENTED — finding file: <filename>` (the spec requires behavior that is absent from the implementation)
 - `VERIFIED — no discrepancy found` (the code matches the spec for this requirement)
 - `SKIPPED — not in module scope` (explicitly out of scope)
 - `UNCERTAIN — could not determine` (needs human review)
@@ -287,21 +290,27 @@ Each finding file should use this structure:
 
 <Critical | High | Medium | Low>
 
-## Spec reference
+## Spec details
 
 - Document: <spec txt/pdf name>
 - Section/page/heading: <specific location>
 - Requirement: <quoted or tightly paraphrased requirement>
+- Expected behavior: <what the spec says should happen>
 
-## Code reference
+## Code details
 
 - File: <path>
-- Lines: <line range>
-- Implementation: <brief description of current behavior>
+- Lines: <validated line range, or "No implementation found" for missing requirements>
+- Current behavior: <brief description of current behavior or absence>
+- Line validation: <how the line range was verified, e.g. `nl -ba <file> | sed -n 'X,Yp'` or equivalent>
 
-## Issue
+## Discrepancy
 
-<Explain the discrepancy between spec and code.>
+<Explain exactly how the code differs from the spec, including spec requirements that are not implemented at all.>
+
+## Possible fix
+
+<Describe a concrete implementation direction or validation change that would satisfy the spec.>
 
 ## Impact
 
@@ -311,6 +320,8 @@ Each finding file should use this structure:
 
 <Concise GitHub-ready comment.>
 ```
+
+Line number accuracy rule: before writing any finding, the subagent must re-open the referenced code with line numbers from the current checkout and confirm the cited range still contains the described behavior. If the issue is a missing implementation, cite the closest relevant file/function/search result and state that no implementation was found rather than inventing a line number.
 
 Tell subagents not to create aggregate summaries in the findings folders; one file per finding keeps the next review step clean.
 
@@ -328,9 +339,10 @@ This independence only applies to the two logic-reviewer passes. The later revie
 After each logic-reviewer subagent completes, validate its output before proceeding:
 
 1. Check that the output directory contains at least one `.md` file (or that the subagent explicitly recorded zero findings in its coverage checklist).
-2. Verify each finding file has the required sections: Category, Severity, Spec reference, Code reference, Issue, Impact, Suggested PR review comment.
-3. Verify each Spec reference and Code reference contains non-placeholder content (no empty `<>` fields).
-4. Verify file timestamps are from the current run (not stale from a previous iteration).
+2. Verify each finding file has the required sections: Category, Severity, Spec details, Code details, Discrepancy, Possible fix, Impact, Suggested PR review comment.
+3. Verify each Spec details and Code details section contains non-placeholder content (no empty `<>` fields).
+4. Verify every code line reference is plausible and includes line-validation evidence; reject findings whose cited lines do not contain the described behavior.
+5. Verify file timestamps are from the current run (not stale from a previous iteration).
 
 If validation fails, halt and report which files are malformed. Do not feed malformed findings to the reviewer.
 
@@ -362,11 +374,13 @@ Ask the reviewer to:
 
 - Deduplicate overlapping findings.
 - Reject findings that are not supported by both spec and code references.
+- Reject or correct findings with inaccurate line numbers; the reviewer must re-check cited files with line numbers before accepting a finding.
 - Tighten categories and severity.
 - Improve GitHub-ready review comments.
 - Preserve one markdown file per accepted finding.
-- Include exact spec section/page/heading and code file/line references.
-- Note any spec requirements from the coverage checklists that were marked UNCERTAIN or that both logic reviewers marked as VERIFIED but the reviewer suspects may have issues.
+- Include exact spec section/page/heading and validated code file/line references.
+- Preserve explicit missing-implementation findings for requirements present in the spec but absent from code.
+- Note any spec requirements from the coverage checklists that were marked NOT_IMPLEMENTED or UNCERTAIN, or that both logic reviewers marked as VERIFIED but the reviewer suspects may have issues.
 
 Each reviewer output file must use this structure:
 
@@ -381,21 +395,27 @@ Each reviewer output file must use this structure:
 
 <Critical | High | Medium | Low>
 
-## Spec reference
+## Spec details
 
 - Document: <spec txt/pdf name>
 - Section/page/heading: <specific location>
 - Requirement: <quoted or tightly paraphrased requirement>
+- Expected behavior: <what the spec says should happen>
 
-## Code reference
+## Code details
 
 - File: <path>
-- Lines: <line range>
-- Implementation: <brief description of current behavior>
+- Lines: <validated line range, or "No implementation found" for missing requirements>
+- Current behavior: <brief description of current behavior or absence>
+- Line validation: <how the line range was verified, e.g. `nl -ba <file> | sed -n 'X,Yp'` or equivalent>
 
-## Issue
+## Discrepancy
 
-<Explain the discrepancy between spec and code.>
+<Explain exactly how the code differs from the spec, including spec requirements that are not implemented at all.>
+
+## Possible fix
+
+<Describe a concrete implementation direction or validation change that would satisfy the spec.>
 
 ## Impact
 
@@ -426,10 +446,11 @@ Personally review all accepted findings in `.pi/review/review/*.md` against the 
 For each finding:
 
 1. Confirm the spec reference exists and supports the claim.
-2. Confirm the code reference exists and line numbers are accurate.
-3. Confirm the issue is in the selected module scope.
-4. Merge duplicates if any remain.
-5. Remove unsupported, vague, or non-actionable findings.
+2. Confirm the code reference exists and line numbers are accurate by opening the current file with line numbers; fix incorrect ranges before using them in the final summary.
+3. For missing-implementation findings, confirm the absence with targeted searches and cite the closest relevant file/function or search evidence instead of fake line numbers.
+4. Confirm the issue is in the selected module scope.
+5. Merge duplicates if any remain.
+6. Remove unsupported, vague, or non-actionable findings.
 
 #### 7c. Verify spec coverage
 
@@ -437,11 +458,12 @@ Read both coverage checklists (`logic-findings-high-coverage.md` and `logic-find
 
 For any requirement marked:
 
+- `NOT_IMPLEMENTED` — verify the spec requirement and code absence yourself, then include it as a finding if supported.
 - `UNCERTAIN` — attempt to verify yourself. If still uncertain, include in the final summary under "Review notes" as an unresolved item.
 - `SKIPPED` — confirm it is genuinely out of module scope. If not, flag it.
 - `VERIFIED` by both reviewers — spot-check a few to build confidence, but do not re-review all of them.
 
-This catches the case where both logic reviewers missed or incorrectly cleared a requirement.
+This catches the case where both logic reviewers missed, omitted, or incorrectly cleared a requirement.
 
 #### 7d. Create final summary
 
@@ -467,33 +489,76 @@ Use this structure:
 
 ## Executive summary
 
-<Brief summary of whether the implementation matches the spec and the most important gaps.>
+<Brief summary of whether the implementation matches the spec and the most important gaps, including missing requirements.>
 
 ## Spec coverage
 
 - Total spec requirements considered: <N>
 - Requirements with findings: <N>
+- Requirements not implemented: <N>
 - Requirements verified with no discrepancy: <N>
 - Requirements out of scope: <N>
 - Requirements uncertain/unresolved: <N>
 
 ## Findings ready for GitHub PR review
 
-### 1. <Finding title>
+Group findings by severity in this order. Omit empty severity groups.
+
+### Critical
+
+#### 1. <Finding title>
 
 - Category: <category>
-- Severity: <severity>
-- Spec reference: <document + section/page/heading>
-- Code reference: `<file>:<line-range>`
+- Spec details: <document + section/page/heading + quoted/paraphrased requirement + expected behavior>
+- Code details: `<file>:<validated line-range>` — <current behavior, or "No implementation found" with search/absence evidence>
+- Discrepancy: <exact mismatch or missing implementation>
+- Possible fix: <concrete implementation direction>
 
 ```suggestion-comment
 <GitHub-ready PR review comment. It should be specific, actionable, and mention the expected behavior from the spec.>
 ```
-````
 
-### 2. <Finding title>
+### High
 
-...
+#### 2. <Finding title>
+
+- Category: <category>
+- Spec details: <document + section/page/heading + quoted/paraphrased requirement + expected behavior>
+- Code details: `<file>:<validated line-range>` — <current behavior, or "No implementation found" with search/absence evidence>
+- Discrepancy: <exact mismatch or missing implementation>
+- Possible fix: <concrete implementation direction>
+
+```suggestion-comment
+<GitHub-ready PR review comment. It should be specific, actionable, and mention the expected behavior from the spec.>
+```
+
+### Medium
+
+#### 3. <Finding title>
+
+- Category: <category>
+- Spec details: <document + section/page/heading + quoted/paraphrased requirement + expected behavior>
+- Code details: `<file>:<validated line-range>` — <current behavior, or "No implementation found" with search/absence evidence>
+- Discrepancy: <exact mismatch or missing implementation>
+- Possible fix: <concrete implementation direction>
+
+```suggestion-comment
+<GitHub-ready PR review comment. It should be specific, actionable, and mention the expected behavior from the spec.>
+```
+
+### Low
+
+#### 4. <Finding title>
+
+- Category: <category>
+- Spec details: <document + section/page/heading + quoted/paraphrased requirement + expected behavior>
+- Code details: `<file>:<validated line-range>` — <current behavior, or "No implementation found" with search/absence evidence>
+- Discrepancy: <exact mismatch or missing implementation>
+- Possible fix: <concrete implementation direction>
+
+```suggestion-comment
+<GitHub-ready PR review comment. It should be specific, actionable, and mention the expected behavior from the spec.>
+```
 
 ## Findings considered but excluded
 
@@ -506,8 +571,7 @@ Use this structure:
 ## Review notes
 
 <Any constraints, missing documents, ambiguous spec language, stale-commit warnings, or assumptions.>
-
-```
+````
 
 The final summary is the only place to produce the single consolidated review. Keep it focused on issues that can be put directly into a GitHub PR review.
 
@@ -515,10 +579,12 @@ The final summary is the only place to produce the single consolidated review. K
 
 A finding is acceptable only when it has all of the following:
 
-- A clear mismatch between spec and implementation.
+- A clear mismatch between spec and implementation, including requirements present in the spec but missing from code.
 - A specific spec reference: document plus section/page/heading or quoted requirement.
-- A specific code reference: file plus line range.
+- A specific code reference: file plus validated line range, or explicit "No implementation found" with search evidence for missing requirements.
+- Line numbers verified against the current checkout immediately before final reporting.
 - A category and severity.
+- Spec details, code details, discrepancy, and possible fix.
 - A concise, actionable GitHub-ready comment.
 - Relevance to the selected module.
 
@@ -550,4 +616,3 @@ Halt and ask/report instead of continuing when:
 - New commits were pushed to the PR head during the review.
 
 When halting, include what you tried and the next piece of information needed from the user.
-```
