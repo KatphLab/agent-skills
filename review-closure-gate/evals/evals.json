@@ -1,0 +1,23 @@
+{
+  "skill_name": "review-closure-gate",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "I ran superspec.review three times on the same feature. Each time reviewers find new issues after I fix the last list. Use the existing code-reviewer skill, but make this converge.",
+      "expected_output": "Pins scope, asks/looks for previous findings ledger, closes prior findings before fresh discovery, and classifies new findings by cause.",
+      "files": []
+    },
+    {
+      "id": 2,
+      "prompt": "Review says all tests pass, but another reviewer found that my tests only assert action is not ADD_POSITION. Help me rerun review without churn.",
+      "expected_output": "Rejects broad negative assertions as closure evidence and requires exact contract assertions in the ledger before closure.",
+      "files": []
+    },
+    {
+      "id": 3,
+      "prompt": "We fixed the old review.md findings, but then updated the spec and reran code-reviewer. It found new P0 protection issues. What process should the reviewer follow?",
+      "expected_output": "Treats spec change as a new baseline/scope change, preserves old closure accounting, and classifies new issues as new-spec-or-scope unless introduced by fixes.",
+      "files": []
+    }
+  ]
+}
