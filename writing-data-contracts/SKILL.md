@@ -9,11 +9,11 @@ description: Use when adding or revising Python request, response, event, config
 
 A data contract makes every accepted state explicit and every impossible state unrepresentable. Model domain meaning—not the legacy container shape.
 
-Use `Engines/capital_allocation/contracts/` for naming, `StrEnum`, `Decimal`, immutability, docstring, and export conventions. Do not copy `base.py`, inherit its classes, or reproduce its freezing and generic-input machinery.
+Use the consuming repository’s specification, local instructions, callers, neighboring contracts, and public exports for naming and reuse. This skill is self-contained: its example is illustrative, not a source of product domain values. Do not inherit custom shared bases or recreate generic freezing and input machinery.
 
 ## Contract Recipe
 
-1. Read the specification, callers, and neighboring contracts. Reuse existing enums and models; never create a second vocabulary.
+1. Read the consuming repository’s specification, callers, local instructions, and neighboring contracts. Reuse existing enums and models; if none exist, define only vocabulary supplied by the specification.
 2. Classify the boundary, then choose the model form.
 3. Give every semantic record a named model. Do not hide an unknown record behind a type alias.
 4. Choose the narrowest domain type for every field.
@@ -78,82 +78,87 @@ Do not hand-write validators for type checks, UUID/date parsing, enum membership
 ## Example
 
 ```python
-"""External capital-allocation order contracts."""
+"""Generic customer-order contracts."""
 
 from decimal import Decimal
 from enum import StrEnum
 from typing import Annotated, Self
 from uuid import UUID
 
-from pydantic import AwareDatetime, BaseModel, ConfigDict, Field, model_validator
-
-from Engines.capital_allocation.contracts.enums import AllocationId
+from pydantic import (
+    AwareDatetime,
+    BaseModel,
+    ConfigDict,
+    Field,
+    PositiveInt,
+    model_validator,
+)
 
 __all__ = [
-    "AllocationLeg",
     "CancellationReason",
-    "CapitalAllocationOrder",
-    "ExecutionProvider",
+    "CurrencyCode",
+    "CustomerOrder",
+    "LineItem",
+    "Money",
     "OrderStatus",
-    "ProviderReceipt",
 ]
 
-PositiveMoney = Annotated[
+_PositiveMoney = Annotated[
     Decimal,
-    Field(gt=Decimal("0"), allow_inf_nan=False, max_digits=24, decimal_places=6),
+    Field(gt=Decimal("0"), allow_inf_nan=False, max_digits=18, decimal_places=2),
 ]
+
+
+class CurrencyCode(StrEnum):
+    """Currencies supported by this illustrative contract."""
+
+    EUR = "EUR"
+    USD = "USD"
 
 
 class OrderStatus(StrEnum):
-    """Supported capital-allocation order states."""
+    """States supported by this illustrative contract."""
 
-    SUBMITTED = "SUBMITTED"
+    PLACED = "PLACED"
     CANCELLED = "CANCELLED"
 
 
 class CancellationReason(StrEnum):
-    """Governed cancellation reason codes."""
+    """Reasons an illustrative order may be cancelled."""
 
-    CLIENT_REQUEST = "CLIENT_REQUEST"
-    RISK_REJECTION = "RISK_REJECTION"
-
-
-class ExecutionProvider(StrEnum):
-    """Configured execution providers."""
-
-    PRIMARY_BROKER = "PRIMARY_BROKER"
-    BACKUP_BROKER = "BACKUP_BROKER"
+    CUSTOMER_REQUEST = "CUSTOMER_REQUEST"
+    DUPLICATE_ORDER = "DUPLICATE_ORDER"
 
 
-class AllocationLeg(BaseModel):
-    """One exact allocation within an order."""
+class Money(BaseModel):
+    """Exact positive amount in a specified currency."""
 
     model_config = ConfigDict(frozen=True, extra="forbid", strict=True)
 
-    allocation_id: AllocationId
-    notional: PositiveMoney
+    amount: _PositiveMoney
+    currency: CurrencyCode
 
 
-class ProviderReceipt(BaseModel):
-    """Structured provider acknowledgement."""
+class LineItem(BaseModel):
+    """One immutable item in a customer order."""
 
     model_config = ConfigDict(frozen=True, extra="forbid", strict=True)
 
-    provider: ExecutionProvider
-    provider_order_id: UUID
-    received_at: AwareDatetime
+    product_id: UUID
+    quantity: PositiveInt
+    unit_price: Money
 
 
-class CapitalAllocationOrder(BaseModel):
-    """Complete immutable order accepted at the external boundary."""
+class CustomerOrder(BaseModel):
+    """Complete immutable order accepted at an external boundary."""
 
     model_config = ConfigDict(frozen=True, extra="forbid", strict=True)
 
     order_id: UUID
     status: OrderStatus
-    legs: Annotated[tuple[AllocationLeg, ...], Field(min_length=1)]
+    items: Annotated[tuple[LineItem, ...], Field(min_length=1)]
     cancellation_reason: CancellationReason | None = None
-    receipt: ProviderReceipt
+    created_at: AwareDatetime
 
     @model_validator(mode="after")
     def validate_cancellation(self) -> Self:
@@ -164,7 +169,7 @@ class CapitalAllocationOrder(BaseModel):
         return self
 ```
 
-The validator exists only because cancellation is a cross-field domain invariant. Pydantic handles every scalar constraint.
+All domain types used by the example are defined inside it. The enum members are illustrative; replace them with the consuming product’s governed vocabulary. The validator exists only because cancellation is a cross-field invariant. Pydantic handles every scalar constraint.
 
 ## Verification
 
@@ -194,4 +199,4 @@ Run only the focused contract tests and repository formatter/linter commands all
 
 ## Red Flags
 
-Stop and redesign if a contract contains `Any`, `object`, `float` for exact values, free-form strings for closed domains, mutable or opaque collection fields, broad optionality, a custom scalar validator, validation in dataclass `__post_init__`, inheritance from `base.py`, placeholder domain types, or compatibility shims preserving those choices.
+Stop and redesign if a contract contains `Any`, `object`, `float` for exact values, free-form strings for closed domains, mutable or opaque collection fields, broad optionality, a custom scalar validator, validation in dataclass `__post_init__`, inheritance from a custom shared base, placeholder domain types, or compatibility shims preserving those choices.
