@@ -1,6 +1,6 @@
 ---
 name: review-closure-gate
-description: Use when repeated code reviews keep finding new issues, review fixes churn across multiple sessions, superspec.review/code-reviewer is being rerun, or a team needs deterministic closure of prior findings before another fresh audit.
+description: Use when repeated reviews keep finding issues, fixes churn across sessions, restart loops target the wrong owner, superspec.review/code-reviewer is rerun, or deterministic closure is required before another audit.
 ---
 
 # Review Closure Gate
@@ -9,7 +9,7 @@ description: Use when repeated code reviews keep finding new issues, review fixe
 
 Fresh reviewers are good at discovery; they are bad at proving closure unless you give them state. Use this skill to turn repeated `requesting-code-review` / code-reviewer / `superspec.review` runs into a deterministic closure gate.
 
-**Core principle:** Close the known list first. New discovery starts only after every previous finding is closed, rejected, or explicitly carried forward with evidence.
+**Core principle:** Close the known list first, and never request correction from a target that cannot make the finding false. New discovery starts only after every previous finding is closed, rejected, or explicitly carried forward with evidence.
 
 **REQUIRED SUB-SKILL:** Use `requesting-code-review` for the actual reviewer dispatch. This skill wraps it with scope control and closure accounting; it does not replace it.
 
@@ -38,6 +38,8 @@ Test paths:
 Source/spec support paths:
 Excluded paths:
 Review baseline:
+Artifact/current-repair-owner map:
+Allowed restart targets and invalidated suffixes:
 ```
 
 Never rely on “latest feature” defaults during remediation. If scope changed since the previous review, say so before comparing findings.
@@ -60,6 +62,12 @@ For every open finding, verify and update:
 ID:
 Status: open | closed | rejected | carried-forward
 Original issue:
+Affected artifact/path:
+Required mutation:
+Current repair owner:
+Selected restart target:
+Owner reachable in invalidated suffix: yes/no
+Evidence producer/version:
 Spec reference:
 Code reference:
 Test reference:
@@ -69,6 +77,13 @@ Reason if rejected/carried-forward:
 ```
 
 A finding is not closed by “tests pass”. It closes only when the specific old failure is impossible and a targeted test or explicit rationale proves it.
+
+An open finding is restartable only when its current repair owner may mutate the
+affected path and will rerun in the selected target's invalidated suffix. If
+stale upstream evidence matters, its producer must also rerun; otherwise reject
+the evidence as superseded/non-authoritative or fail with the unreachable owner.
+Never assign an upstream artifact correction to a downstream node that can only
+read or recover its information.
 
 ### 4. Reject weak closure evidence
 
@@ -107,6 +122,7 @@ Carried forward: N
 New findings: N
 New-finding causes: missed-before / introduced-by-fix / new-spec-or-scope / different-review-scope / confidence-promoted
 Converging? yes/no, with reason
+Unreachable open findings: N
 Next action:
 ```
 
@@ -122,6 +138,7 @@ Closure discipline:
 - Do not start fresh discovery until prior findings are accounted for.
 - For every new finding, classify cause: missed-before, introduced-by-fix, new-spec-or-scope, different-review-scope, or confidence-promoted.
 - Reject broad negative tests as closure evidence; require exact contract assertions.
+- Before requesting restart, prove every open finding's repair owner and evidence producer are reachable from the selected allowed target; otherwise reject/reclassify the finding or fail with the unreachable owner.
 - Final output must include convergence counts.
 ```
 
@@ -131,6 +148,8 @@ Closure discipline:
 | ----------------------------------------------- | --------------------------------------------------------- |
 | Rerunning review without scope                  | Pin feature/spec/code/test paths first                    |
 | Treating optional review files as durable state | Consolidate into one ledger                               |
+| Restarting the convergence node for every defect | Map the required mutation to its current owner and prove that owner reruns |
+| Requiring a frozen upstream report to change | Rerun its producer or treat current downstream evidence as authoritative |
 | Fixing new issues before old closure            | Close or carry forward old findings first                 |
 | Letting spec edits silently change target       | create a new baseline and classify as `new-spec-or-scope` |
 | Counting passing tests as closure               | require targeted old-failure evidence                     |
@@ -148,6 +167,8 @@ Closure discipline:
 - Test paths:
 - Source/spec support paths:
 - Excluded paths:
+- Artifact/current-repair-owner map:
+- Allowed restart targets and invalidated suffixes:
 
 ## Findings
 
@@ -158,6 +179,12 @@ Closure discipline:
 - Severity/confidence:
 - Spec reference:
 - Code reference:
+- Affected artifact/path:
+- Required mutation:
+- Current repair owner:
+- Selected restart target:
+- Owner reachable in invalidated suffix:
+- Evidence producer/version:
 - Required behavior:
 - Closure evidence:
 - Verification:
