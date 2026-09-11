@@ -1,6 +1,7 @@
 ---
 name: review-closure-gate
 description: Use when repeated reviews keep finding issues, fixes churn across sessions, restart loops target the wrong owner, superspec.review/code-reviewer is rerun, or deterministic closure is required before another audit.
+hide: true
 ---
 
 # Review Closure Gate

@@ -1,6 +1,7 @@
 ---
 name: pruning-unit-tests
 description: Use when reviewing, pruning, or approving unit tests for production suites; when tests look brittle, implementation-focused, mock-heavy, coverage-driven, obsolete after TDD, or disconnected from product behavior.
+hide: true
 ---
 
 # Pruning Unit Tests

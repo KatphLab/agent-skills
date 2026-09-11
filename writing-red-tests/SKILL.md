@@ -1,6 +1,7 @@
 ---
 name: writing-red-tests
 description: Use when writing RED tests before implementation exists, especially when specifications exist but production code is missing or incomplete. This skill prevents vague overview tests by requiring every RED test to call the planned public API and assert concrete observable behavior.
+hide: true
 ---
 
 # Writing RED Tests
