@@ -1,7 +1,6 @@
 ---
 name: pruning-unit-tests
 description: Use when reviewing, pruning, or approving unit tests for production suites; when tests look brittle, implementation-focused, mock-heavy, coverage-driven, obsolete after TDD, or disconnected from product behavior.
-hide: true
 ---
 
 # Pruning Unit Tests
@@ -28,12 +27,12 @@ Decision:
 
 ## Triage Table
 
-| Classification | Action | Examples |
-| --- | --- | --- |
-| Preserve | Keep as-is or make the name/assertion clearer | Public API contract, business rule, error handling, invariant, regression for a real bug |
-| Rewrite | Keep the behavioral intent, replace implementation assertions | Mock call counts, private helper calls, broad snapshots, internal state checks |
-| Delete | Remove from production suite | Coverage filler, duplicate with no new branch, framework/library behavior, obsolete TDD scaffold, test of a mock/test helper |
-| Investigate | Do not edit yet | Ambiguous product contract, failing test that may indicate a bug, unclear ownership |
+| Classification | Action                                                        | Examples                                                                                                                     |
+| -------------- | ------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------- |
+| Preserve       | Keep as-is or make the name/assertion clearer                 | Public API contract, business rule, error handling, invariant, regression for a real bug                                     |
+| Rewrite        | Keep the behavioral intent, replace implementation assertions | Mock call counts, private helper calls, broad snapshots, internal state checks                                               |
+| Delete         | Remove from production suite                                  | Coverage filler, duplicate with no new branch, framework/library behavior, obsolete TDD scaffold, test of a mock/test helper |
+| Investigate    | Do not edit yet                                               | Ambiguous product contract, failing test that may indicate a bug, unclear ownership                                          |
 
 ## Delete Criteria
 
@@ -51,14 +50,14 @@ Coverage policy is not a reason to keep garbage. If deleting a bad test drops re
 
 ## Rewrite Patterns
 
-| Bad test checks | Better test checks |
-| --- | --- |
-| `toHaveBeenCalledWith(...)` on an internal collaborator | Returned value, persisted state, emitted event, rendered role/text, or external side effect |
-| Private helper output | Public API behavior over inputs that exercise that helper |
-| Large snapshot | Specific semantic contract: accessible text, state transition, serialized output, validation error |
-| Exact algorithm steps | Required observable result, ordering only if ordering is part of the contract |
-| Mock component/test double exists | Parent behavior visible to the user or caller |
-| Old TDD scaffold | Current accepted behavior, or nothing if the behavior was abandoned |
+| Bad test checks                                         | Better test checks                                                                                 |
+| ------------------------------------------------------- | -------------------------------------------------------------------------------------------------- |
+| `toHaveBeenCalledWith(...)` on an internal collaborator | Returned value, persisted state, emitted event, rendered role/text, or external side effect        |
+| Private helper output                                   | Public API behavior over inputs that exercise that helper                                          |
+| Large snapshot                                          | Specific semantic contract: accessible text, state transition, serialized output, validation error |
+| Exact algorithm steps                                   | Required observable result, ordering only if ordering is part of the contract                      |
+| Mock component/test double exists                       | Parent behavior visible to the user or caller                                                      |
+| Old TDD scaffold                                        | Current accepted behavior, or nothing if the behavior was abandoned                                |
 
 ## Example
 
@@ -118,6 +117,7 @@ When pruning or reviewing tests, report concrete decisions:
 
 ```markdown
 ## Unit test pruning
+
 - Deleted: `path/to/test.ts` / `test name` — no production behavior; only asserted mock call order.
 - Rewritten: `path/to/test.ts` / `test name` — now asserts persisted canonical email instead of private helper call.
 - Preserved: `path/to/test.ts` / `test name` — protects validation error contract for empty email.

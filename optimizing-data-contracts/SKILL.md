@@ -38,21 +38,21 @@ No measured problem and no semantic mismatch means no migration. A cheaper type 
 
 ## Quick Reference
 
-| Required behavior | Best default |
-|---|---|
-| Untrusted input, runtime rejection, schema, model dump | Pydantic `BaseModel` |
-| Trusted internal attribute record | `@dataclass(frozen=True, slots=True)` |
-| Deliberately mutable internal state | Mutable slotted dataclass |
-| Plain-dict interoperability, static shape only | `TypedDict` |
-| Positional tuple contract | `NamedTuple` |
-| One-use closed values or union tag | `Literal[...]` |
-| Reusable textual domain/wire vocabulary | `StrEnum` |
-| Reusable nominal domain, primitive equality unwanted | `Enum` |
-| Numeric wire value without arithmetic semantics | `Enum` with integer values |
-| Required integer substitutability | `IntEnum`—rare |
-| Intrinsic bitmask operations | `Flag`; `IntFlag` only for integer interop |
-| Conceptual permission set, not a bitmask | `frozenset[Permission]` |
-| Static scalar distinction, no runtime checks | `NewType` |
+| Required behavior                                      | Best default                               |
+| ------------------------------------------------------ | ------------------------------------------ |
+| Untrusted input, runtime rejection, schema, model dump | Pydantic `BaseModel`                       |
+| Trusted internal attribute record                      | `@dataclass(frozen=True, slots=True)`      |
+| Deliberately mutable internal state                    | Mutable slotted dataclass                  |
+| Plain-dict interoperability, static shape only         | `TypedDict`                                |
+| Positional tuple contract                              | `NamedTuple`                               |
+| One-use closed values or union tag                     | `Literal[...]`                             |
+| Reusable textual domain/wire vocabulary                | `StrEnum`                                  |
+| Reusable nominal domain, primitive equality unwanted   | `Enum`                                     |
+| Numeric wire value without arithmetic semantics        | `Enum` with integer values                 |
+| Required integer substitutability                      | `IntEnum`—rare                             |
+| Intrinsic bitmask operations                           | `Flag`; `IntFlag` only for integer interop |
+| Conceptual permission set, not a bitmask               | `frozenset[Permission]`                    |
+| Static scalar distinction, no runtime checks           | `NewType`                                  |
 
 ## Example: Validate Once, Compute Cheaply
 
@@ -99,17 +99,17 @@ When performance motivated the change, benchmark the real path before and after 
 
 ## Common Mistakes
 
-| Mistake | Correction |
-|---|---|
-| “Internal” means trusted | Trace every construction path; persisted and message data remain boundary data. |
-| `TypedDict` validates dictionaries | It is static typing; use Pydantic when runtime rejection is required. |
-| `NamedTuple` is a faster dataclass | Choose it only for required tuple semantics; benchmark costs separately. |
-| Every closed set deserves an enum | Use `Literal` for local tags; enum identity must earn its runtime API. |
-| “The architect wants enums everywhere” | Uniform selection criteria beat uniform representation; do not invent enum identity for a one-use `Literal`. |
-| Every combinable set deserves `Flag` | Use `Flag` only when bitmask algebra or protocol encoding is intrinsic. |
-| `slots=True` proves optimization | It removes the instance dictionary; measure the application-level effect. |
-| `model_construct()` is fast Pydantic | It skips validation and can create invalid models; use only with proven trusted data and a benchmark. |
-| Pydantic dataclass is a compromise | It still performs validation but lacks the full `BaseModel` API; use it only for required dataclass integration. |
+| Mistake                                | Correction                                                                                                       |
+| -------------------------------------- | ---------------------------------------------------------------------------------------------------------------- |
+| “Internal” means trusted               | Trace every construction path; persisted and message data remain boundary data.                                  |
+| `TypedDict` validates dictionaries     | It is static typing; use Pydantic when runtime rejection is required.                                            |
+| `NamedTuple` is a faster dataclass     | Choose it only for required tuple semantics; benchmark costs separately.                                         |
+| Every closed set deserves an enum      | Use `Literal` for local tags; enum identity must earn its runtime API.                                           |
+| “The architect wants enums everywhere” | Uniform selection criteria beat uniform representation; do not invent enum identity for a one-use `Literal`.     |
+| Every combinable set deserves `Flag`   | Use `Flag` only when bitmask algebra or protocol encoding is intrinsic.                                          |
+| `slots=True` proves optimization       | It removes the instance dictionary; measure the application-level effect.                                        |
+| `model_construct()` is fast Pydantic   | It skips validation and can create invalid models; use only with proven trusted data and a benchmark.            |
+| Pydantic dataclass is a compromise     | It still performs validation but lacks the full `BaseModel` API; use it only for required dataclass integration. |
 
 ## Red Flags
 

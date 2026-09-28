@@ -33,6 +33,7 @@ The script handles the full OAuth2 token lifecycle automatically. You provide cr
 ### Config file (`~/.zoho-workdrive.json`)
 
 Initial setup — you provide `client_id`, `client_secret`, and a one-time `code`:
+
 ```json
 {
   "client_id": "1000.XXXXXXXXXX",
@@ -42,6 +43,7 @@ Initial setup — you provide `client_id`, `client_secret`, and a one-time `code
 ```
 
 After the first run, the script adds `access_token`, `refresh_token`, `token_expiry`, and `accounts_url` to the same file:
+
 ```json
 {
   "client_id": "1000.XXXXXXXXXX",
@@ -56,6 +58,7 @@ After the first run, the script adds `access_token`, `refresh_token`, `token_exp
 ### Token lifecycle
 
 The script resolves a valid token in this order:
+
 1. **Cached access_token** exists and not expired → use silently (no network call, no output)
 2. **Expired** → use `refresh_token` to get a new one automatically
 3. **Refresh fails** → exchange `code` from config for new tokens
@@ -90,11 +93,11 @@ python scripts/download.py "https://workdrive.zoho.com/file/abc123" --base-url h
 
 ## Options
 
-| Flag | Description |
-|------|-------------|
-| `--output`, `-o` | Output file path or directory (default: current directory) |
+| Flag             | Description                                                  |
+| ---------------- | ------------------------------------------------------------ |
+| `--output`, `-o` | Output file path or directory (default: current directory)   |
 | `--config`, `-c` | Path to config JSON file (default: `~/.zoho-workdrive.json`) |
-| `--base-url` | Override API base URL |
+| `--base-url`     | Override API base URL                                        |
 
 ## How It Works
 
@@ -111,11 +114,11 @@ python scripts/download.py "https://workdrive.zoho.com/file/abc123" --base-url h
 
 ## Troubleshooting
 
-| Issue | Fix |
-|-------|-----|
+| Issue                   | Fix                                                                       |
+| ----------------------- | ------------------------------------------------------------------------- |
 | `Config file not found` | Create `~/.zoho-workdrive.json` with `client_id`, `client_secret`, `code` |
-| `No valid credentials` | Generate a new auth code from Zoho API Console and add to config |
-| `Auth code expired` | The code is one-time and short-lived — generate a new one |
-| `Refresh token invalid` | Delete `refresh_token` from config, add a new `code`, run again |
-| `File not found` | Check the URL; file may be deleted or access revoked |
-| Wrong region | Use `--base-url` to override, or check the URL domain |
+| `No valid credentials`  | Generate a new auth code from Zoho API Console and add to config          |
+| `Auth code expired`     | The code is one-time and short-lived — generate a new one                 |
+| `Refresh token invalid` | Delete `refresh_token` from config, add a new `code`, run again           |
+| `File not found`        | Check the URL; file may be deleted or access revoked                      |
+| Wrong region            | Use `--base-url` to override, or check the URL domain                     |

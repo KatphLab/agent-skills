@@ -145,16 +145,16 @@ Closure discipline:
 
 ## Common Mistakes
 
-| Mistake                                         | Fix                                                       |
-| ----------------------------------------------- | --------------------------------------------------------- |
-| Rerunning review without scope                  | Pin feature/spec/code/test paths first                    |
-| Treating optional review files as durable state | Consolidate into one ledger                               |
+| Mistake                                          | Fix                                                                        |
+| ------------------------------------------------ | -------------------------------------------------------------------------- |
+| Rerunning review without scope                   | Pin feature/spec/code/test paths first                                     |
+| Treating optional review files as durable state  | Consolidate into one ledger                                                |
 | Restarting the convergence node for every defect | Map the required mutation to its current owner and prove that owner reruns |
-| Requiring a frozen upstream report to change | Rerun its producer or treat current downstream evidence as authoritative |
-| Fixing new issues before old closure            | Close or carry forward old findings first                 |
-| Letting spec edits silently change target       | create a new baseline and classify as `new-spec-or-scope` |
-| Counting passing tests as closure               | require targeted old-failure evidence                     |
-| Using different reviewer shards each run        | keep a fixed reviewer matrix for closure cycles           |
+| Requiring a frozen upstream report to change     | Rerun its producer or treat current downstream evidence as authoritative   |
+| Fixing new issues before old closure             | Close or carry forward old findings first                                  |
+| Letting spec edits silently change target        | create a new baseline and classify as `new-spec-or-scope`                  |
+| Counting passing tests as closure                | require targeted old-failure evidence                                      |
+| Using different reviewer shards each run         | keep a fixed reviewer matrix for closure cycles                            |
 
 ## Minimal Ledger Template
 
