@@ -1,7 +1,7 @@
 ---
 name: optimize-instructions
 description: Use when asked to optimize, tighten, simplify, clean up, or rewrite markdown instruction files, prompts, system prompts, agent docs, skill docs, slash commands, or markdown workflows in place.
-hide: true
+disable-model-invocation: true
 ---
 
 # Optimize Instructions

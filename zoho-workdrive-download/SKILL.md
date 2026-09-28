@@ -1,7 +1,7 @@
 ---
 name: zoho-workdrive-download
 description: Download files from Zoho WorkDrive using a share link or file ID. Use when the user provides a WorkDrive URL like https://workdrive.zoho.in/file/... or https://workdrive.zoho.com/file/..., wants to download a document from Zoho WorkDrive, or mentions pulling files from WorkDrive.
-hide: true
+disable-model-invocation: true
 ---
 
 # Zoho WorkDrive Downloader

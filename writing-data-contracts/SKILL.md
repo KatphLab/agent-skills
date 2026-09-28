@@ -1,7 +1,7 @@
 ---
 name: writing-data-contracts
 description: Use when adding or revising Python request, response, event, configuration, persistence, or calculation-result contracts, especially under contracts modules or when field types, optionality, monetary precision, nested payloads, or Pydantic validation are undecided.
-hide: true
+disable-model-invocation: true
 ---
 
 # Writing Data Contracts
@@ -26,11 +26,11 @@ Compatibility pressure does not weaken a new contract. Migrate callers cleanly; 
 
 ## Choose the Model Form
 
-| Contract role | Form |
-|---|---|
-| API, ingestion, serialization, persistence, event, or untrusted input | Direct Pydantic `BaseModel` with `ConfigDict(frozen=True, extra="forbid", strict=True)` |
-| Trusted internal calculation result with no parsing or runtime validation | `@dataclass(frozen=True, slots=True)` |
-| Internal record requiring parsing, schema generation, or validation | Pydantic model; do not recreate Pydantic in `__post_init__` |
+| Contract role                                                             | Form                                                                                    |
+| ------------------------------------------------------------------------- | --------------------------------------------------------------------------------------- |
+| API, ingestion, serialization, persistence, event, or untrusted input     | Direct Pydantic `BaseModel` with `ConfigDict(frozen=True, extra="forbid", strict=True)` |
+| Trusted internal calculation result with no parsing or runtime validation | `@dataclass(frozen=True, slots=True)`                                                   |
+| Internal record requiring parsing, schema generation, or validation       | Pydantic model; do not recreate Pydantic in `__post_init__`                             |
 
 Standard dataclasses must not define validation in `__post_init__`. If construction can reject data or one field constrains another, use Pydantic.
 
@@ -38,15 +38,15 @@ Never introduce a shared contract base merely to centralize three config flags.
 
 ## Type Rules
 
-| Meaning | Type |
-|---|---|
-| Money, ratios, governed exact numerics | `Decimal`, with `Field` precision/range/finiteness constraints |
-| Closed text domain, status, mode, reason, source | Existing or new `StrEnum` |
-| Identifier | Existing domain ID type or `UUID`; constrained `str` only for genuinely open identifiers |
-| Date/time | `date` or Pydantic `AwareDatetime` as required |
-| Semantic record | Named nested Pydantic model or dataclass |
-| Ordered collection | `tuple[T, ...]`, optionally constrained with `Field` |
-| Dynamic keyed domain | Named `Mapping[KeyEnum, ValueType]` alias or wrapper only when map semantics are intrinsic |
+| Meaning                                          | Type                                                                                       |
+| ------------------------------------------------ | ------------------------------------------------------------------------------------------ |
+| Money, ratios, governed exact numerics           | `Decimal`, with `Field` precision/range/finiteness constraints                             |
+| Closed text domain, status, mode, reason, source | Existing or new `StrEnum`                                                                  |
+| Identifier                                       | Existing domain ID type or `UUID`; constrained `str` only for genuinely open identifiers   |
+| Date/time                                        | `date` or Pydantic `AwareDatetime` as required                                             |
+| Semantic record                                  | Named nested Pydantic model or dataclass                                                   |
+| Ordered collection                               | `tuple[T, ...]`, optionally constrained with `Field`                                       |
+| Dynamic keyed domain                             | Named `Mapping[KeyEnum, ValueType]` alias or wrapper only when map semantics are intrinsic |
 
 Never use `Any`, `object`, bare `dict`, bare `list`, opaque `dict[str, ...]`, or list fields. A typed alias does not make an opaque dictionary a contract. Prefer named nested records; use a typed `Mapping` only for a genuinely dynamic homogeneous map.
 
@@ -186,17 +186,17 @@ Run only the focused contract tests and repository formatter/linter commands all
 
 ## Common Mistakes
 
-| Mistake or excuse | Required correction |
-|---|---|
-| “The wire shape already passes.” | Passing an opaque shape does not define a safe contract; migrate it. |
-| “A type alias makes the dictionary typed.” | Replace semantic dictionaries with named models. |
-| “Use the shared base for consistency.” | Subclass `BaseModel` directly; consistency comes from explicit local config. |
-| “Float avoids breaking callers.” | Use `Decimal`; update producers and consumers together. |
-| “Custom checks are safer.” | Use maintained Pydantic types and constraints; custom code only for business relationships. |
-| “The field is not always present.” | Prove absence is a domain state before adding `None`. |
-| “The enum values are probably these.” | Find the governed vocabulary; never guess a contract domain. |
-| “It is only one `__post_init__` invariant.” | Construction-time rejection is runtime validation; choose Pydantic. |
-| “A placeholder import makes the missing domain visible.” | A nonexistent type is not a contract; report the blocker without claiming completion. |
+| Mistake or excuse                                        | Required correction                                                                         |
+| -------------------------------------------------------- | ------------------------------------------------------------------------------------------- |
+| “The wire shape already passes.”                         | Passing an opaque shape does not define a safe contract; migrate it.                        |
+| “A type alias makes the dictionary typed.”               | Replace semantic dictionaries with named models.                                            |
+| “Use the shared base for consistency.”                   | Subclass `BaseModel` directly; consistency comes from explicit local config.                |
+| “Float avoids breaking callers.”                         | Use `Decimal`; update producers and consumers together.                                     |
+| “Custom checks are safer.”                               | Use maintained Pydantic types and constraints; custom code only for business relationships. |
+| “The field is not always present.”                       | Prove absence is a domain state before adding `None`.                                       |
+| “The enum values are probably these.”                    | Find the governed vocabulary; never guess a contract domain.                                |
+| “It is only one `__post_init__` invariant.”              | Construction-time rejection is runtime validation; choose Pydantic.                         |
+| “A placeholder import makes the missing domain visible.” | A nonexistent type is not a contract; report the blocker without claiming completion.       |
 
 ## Red Flags
 
