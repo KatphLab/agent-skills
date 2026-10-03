@@ -49,11 +49,16 @@ def command(argv, cwd=None):
     return result.stdout.strip()
 
 
-def worker_spec(meta, agent, report):
+def worker_spec(meta, agent, report, repo):
     return f'''Review PR #{meta['number']}: {meta['url']}
-Do a code review and explain whether it can be merged, including any blocking issues.
+Do an independent code review and explain whether it can be merged, including any blocking issues.
+Use only the existing workspace at {repo} for repository inspection and commands.
+Do not clone or copy the repository, create another worktree, or use another checkout.
 Do not change source code, switch branches, or merge/post anything.
-Write your finished review to {report} (temporary file, then rename).
+Do not read, search for, or use other agents' reviews, reports, or session output,
+including sibling files in the report directory and review comments on the PR.
+Form your conclusions independently from the code and PR diff, not other reviewers.
+Write only your own finished review to {report} (temporary file, then rename).
 End the report with Merge verdict: YES, NO, or UNCERTAIN (choose one).
 '''
 
@@ -291,7 +296,7 @@ def main(argv=None):
                 state['workers'][agent] = {'status': 'starting', 'launchParams': {
                     'agent': agent, 'operationId': f'{int(time.time() * 1000)}-{uuid.uuid4().hex}',
                     'target': {'kind': 'existing', 'worktree': f'id:{workspace["id"]}'},
-                    'prompt': {'text': worker_spec(meta, agent, directory / f'{agent}.md'), 'delivery': 'submit'}}}
+                    'prompt': {'text': worker_spec(meta, agent, directory / f'{agent}.md', repo), 'delivery': 'submit'}}}
             # Persist identities and exact launch requests BEFORE any concurrent mutation.
             atomic_json(directory / 'manifest.json', state)
             print(f'\nReport folder (shared by all reviewers):\n{directory}', flush=True)
