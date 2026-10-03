@@ -276,7 +276,8 @@ def main(argv=None):
                 raise RuntimeError('Orca did not identify an existing workspace')
             remote_url = command(['git', 'remote', 'get-url', args.remote], repo)
             owner = json.loads(command(['gh', 'repo', 'view', remote_url, '--json', 'nameWithOwner'], repo))['nameWithOwner']
-            meta = json.loads(command(['gh', 'pr', 'view', '--repo', owner,
+            branch = command(['git', 'symbolic-ref', '--quiet', '--short', 'HEAD'], repo)
+            meta = json.loads(command(['gh', 'pr', 'view', branch, '--repo', owner,
                                       '--json', 'number,url,headRefOid,baseRefOid'], repo))
             stamp = datetime.datetime.now(datetime.timezone.utc).strftime('%Y%m%dT%H%M%SZ')
             token = uuid.uuid4().hex[:8]
