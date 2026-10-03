@@ -209,7 +209,6 @@ def wait_for_reviews(state, directory, minutes, collect_only=False):
 
 def main(argv=None):
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument('pr', nargs='?', type=int)
     parser.add_argument('--repo', type=Path, default=Path.cwd(), help='Existing local Orca workspace path')
     parser.add_argument('--remote', default='origin')
     parser.add_argument('--agents', help='Comma-separated Orca agent IDs; overrides config')
@@ -266,10 +265,6 @@ def main(argv=None):
             runtime = LocalRuntime()
             runtime.preflight()
             agents = configured_agents(args.agents, args.config.expanduser())
-            if args.pr is None:
-                args.pr = int(input('PR number: ').strip().removeprefix('#'))
-            if args.pr <= 0:
-                raise RuntimeError('PR number must be positive')
             for tool in ('git', 'gh'):
                 if not shutil.which(tool):
                     raise RuntimeError(f'Missing executable: {tool}')
@@ -281,12 +276,12 @@ def main(argv=None):
                 raise RuntimeError('Orca did not identify an existing workspace')
             remote_url = command(['git', 'remote', 'get-url', args.remote], repo)
             owner = json.loads(command(['gh', 'repo', 'view', remote_url, '--json', 'nameWithOwner'], repo))['nameWithOwner']
-            meta = json.loads(command(['gh', 'pr', 'view', str(args.pr), '--repo', owner,
+            meta = json.loads(command(['gh', 'pr', 'view', '--repo', owner,
                                       '--json', 'number,url,headRefOid,baseRefOid'], repo))
             stamp = datetime.datetime.now(datetime.timezone.utc).strftime('%Y%m%dT%H%M%SZ')
             token = uuid.uuid4().hex[:8]
             directory = (args.output_dir or Path.home() / '.local/share/orca-pr-review/reports' /
-                         owner.replace('/', '--') / f'pr-{args.pr}-{stamp}-{token}').expanduser().resolve()
+                         owner.replace('/', '--') / f'pr-{meta["number"]}-{stamp}-{token}').expanduser().resolve()
             directory.mkdir(parents=True, exist_ok=False)
             directory.chmod(0o700)
             state = {'launchMode': 'direct-v1', 'reportFormat': 'markdown', 'pr': meta, 'repo': str(repo),
