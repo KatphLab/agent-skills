@@ -3,8 +3,9 @@ name: archify
 description: "Create validated architecture, workflow, sequence, data-flow, lifecycle/state, ERD, class, tree, timeline, and waterfall diagrams as explorable standalone HTML with dark/light themes, motion and image/SVG/WebM export. Accept requirements or Mermaid; inspect repository evidence for code-backed diagrams. Use when visualizing systems, API calls, pipelines, schemas, histories, timings, or everyday steps, parts, relationships and states. Also turn an answer into a one-page explainer, with the conclusion first, structured panels, native diagrams and charts, when the user asks for a page, an explainer or an answer to share (做成一页, 用页面讲), or proactively when the user's rules opt in with an [archify explainer: ...] line. Not for dashboards."
 license: Apache-2.0
 metadata:
-  version: "3.2"
+  version: '3.2'
   author: tt-a1i
+disable-model-invocation: true
 ---
 
 # Archify
@@ -54,21 +55,20 @@ Use this path for ordinary generation. Read branch references only when their st
 
 Before the first candidate, use the authoring references and relevant repository source, not Archify implementation or tests. Inspect Archify implementation if diagnostics remain unactionable after focused repairs.
 
-
 ## Type router
 
-| Type | Use for | Schema | Example |
-|---|---|---|---|
-| `architecture` | Components, services, cloud/security boundaries, infrastructure; what something everyday is made of | `schemas/architecture.schema.json` | System descriptions, services, libraries, and CLI repos: `examples/web-app.architecture.json`; deployment repos: `examples/production-deployment.architecture.json` |
-| `workflow` | Processes, approval gates, tool calls, runbooks, CI/CD; plans and step-by-step life processes | `schemas/workflow.schema.json` | `examples/agent-tool-call.workflow.json` |
-| `sequence` | API call chains, request lifecycles, async traces, returns; back-and-forth between people | `schemas/sequence.schema.json` | `examples/cache-miss-request.sequence.json` |
-| `dataflow` | Pipelines, ETL/ELT, lineage, governance, consumers; where money or documents go | `schemas/dataflow.schema.json` | `examples/product-analytics.dataflow.json` |
-| `lifecycle` | State/status transitions, retries, waiting and terminal states; where an application or order stands | `schemas/lifecycle.schema.json` | `examples/deployment-release.lifecycle.json` |
-| `erd` | Tables/entities, attributes, primary/foreign/unique keys, cardinality between them | `schemas/erd.schema.json` | `examples/orders.erd.json` |
-| `tree` | Single-parent containment: repository/module trees, capability or feature breakdowns, org-style decomposition | `schemas/tree.schema.json` | `examples/payment-platform.tree.json` |
-| `class` | Classes, interfaces, selected members, and dependency/association/inheritance/realization/composition between types | `schemas/class.schema.json` | `examples/payments.class.json` |
-| `timeline` | When things happened: incident reviews, release histories, timestamped events on a proportional clock with source lanes | `schemas/timeline.schema.json` | `examples/payment-incident.timeline.json` |
-| `waterfall` | Where the time went: span durations, overlap, and nesting of one request or agent run on a common time axis | `schemas/waterfall.schema.json` | `examples/checkout-request.waterfall.json` |
+| Type           | Use for                                                                                                                 | Schema                             | Example                                                                                                                                                             |
+| -------------- | ----------------------------------------------------------------------------------------------------------------------- | ---------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `architecture` | Components, services, cloud/security boundaries, infrastructure; what something everyday is made of                     | `schemas/architecture.schema.json` | System descriptions, services, libraries, and CLI repos: `examples/web-app.architecture.json`; deployment repos: `examples/production-deployment.architecture.json` |
+| `workflow`     | Processes, approval gates, tool calls, runbooks, CI/CD; plans and step-by-step life processes                           | `schemas/workflow.schema.json`     | `examples/agent-tool-call.workflow.json`                                                                                                                            |
+| `sequence`     | API call chains, request lifecycles, async traces, returns; back-and-forth between people                               | `schemas/sequence.schema.json`     | `examples/cache-miss-request.sequence.json`                                                                                                                         |
+| `dataflow`     | Pipelines, ETL/ELT, lineage, governance, consumers; where money or documents go                                         | `schemas/dataflow.schema.json`     | `examples/product-analytics.dataflow.json`                                                                                                                          |
+| `lifecycle`    | State/status transitions, retries, waiting and terminal states; where an application or order stands                    | `schemas/lifecycle.schema.json`    | `examples/deployment-release.lifecycle.json`                                                                                                                        |
+| `erd`          | Tables/entities, attributes, primary/foreign/unique keys, cardinality between them                                      | `schemas/erd.schema.json`          | `examples/orders.erd.json`                                                                                                                                          |
+| `tree`         | Single-parent containment: repository/module trees, capability or feature breakdowns, org-style decomposition           | `schemas/tree.schema.json`         | `examples/payment-platform.tree.json`                                                                                                                               |
+| `class`        | Classes, interfaces, selected members, and dependency/association/inheritance/realization/composition between types     | `schemas/class.schema.json`        | `examples/payments.class.json`                                                                                                                                      |
+| `timeline`     | When things happened: incident reviews, release histories, timestamped events on a proportional clock with source lanes | `schemas/timeline.schema.json`     | `examples/payment-incident.timeline.json`                                                                                                                           |
+| `waterfall`    | Where the time went: span durations, overlap, and nesting of one request or agent run on a common time axis             | `schemas/waterfall.schema.json`    | `examples/checkout-request.waterfall.json`                                                                                                                          |
 
 When choosing among native diagram types is ambiguous, run `node bin/archify.mjs guide "<scenario>" --json`. Scenario proof examples are structural references, not facts to copy.
 

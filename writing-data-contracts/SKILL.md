@@ -1,7 +1,6 @@
 ---
 name: writing-data-contracts
 description: Use when adding or revising Python request, response, event, configuration, persistence, or calculation-result contracts, especially under contracts modules or when field types, optionality, monetary precision, nested payloads, or Pydantic validation are undecided.
-disable-model-invocation: true
 ---
 
 # Writing Data Contracts

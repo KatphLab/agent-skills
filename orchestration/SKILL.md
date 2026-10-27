@@ -8,6 +8,7 @@ description: >-
   agent", "another worktree" — unless asked to supervise, monitor, or coordinate
   a DAG, and for terminal control, lightweight terminal prompts, shell commands,
   Orca worktree management, and reading or waiting on terminals.
+disable-model-invocation: true
 ---
 
 # Orca Orchestration
