@@ -15,7 +15,7 @@ compatibility: >
 metadata:
   author: alibaba
   homepage: https://github.com/alibaba/open-code-review
-  version: '1.0.0'
+  version: "1.0.0"
 disable-model-invocation: true
 ---
 
@@ -28,11 +28,12 @@ A skill for performing AI code review where OCR provides deterministic engineeri
 ### Step 1: Preview — Determine What to Review
 
 ```bash
-ocr delegate preview --format json [--from <ref> --to <ref>] [--commit <hash>] [--exclude <patterns>]
+ocr delegate preview --format json [--from <ref> [--to <ref>]] [--commit <hash>] [--exclude <patterns>]
 ```
 
-This outputs:
+With `--from` and no `--to`, both delegate subcommands default to `HEAD`. Range review compares the merge-base to the target commit and excludes staged, unstaged, and untracked changes. Omit range/commit flags for workspace mode; range and commit flags are mutually exclusive.
 
+This outputs:
 - **mode** (workspace / range / commit)
 - **from / to / commit / merge_base** — ref metadata for constructing git commands
 - **Reviewable file list** — paths, status, insertions/deletions
@@ -40,19 +41,22 @@ This outputs:
 
 **Common invocations:**
 
-| Scenario          | Command                                         |
-| ----------------- | ----------------------------------------------- |
-| Workspace changes | `ocr delegate preview`                          |
+| Scenario | Command |
+|----------|---------|
+| Workspace changes | `ocr delegate preview` |
 | Branch comparison | `ocr delegate preview --from main --to feature` |
-| Single commit     | `ocr delegate preview -c abc123`                |
+| Current branch against main | `ocr delegate preview --from main` |
+| Single commit | `ocr delegate preview -c abc123` |
 
 ### Step 2: Get Rules for Files
 
 ```bash
-ocr delegate rule --format json <path1> <path2> ...
+ocr delegate rule --format json [--from <ref> [--to <ref>]] [--commit <hash>] <path1> <path2> ...
 ```
 
 Pass the reviewable file paths from Step 1. Output is grouped by rule content — files sharing the same rule appear under one group, avoiding repetition.
+
+Pass the same range or commit flags as in Step 1 so rules are resolved against the same target. For example, pair `ocr delegate preview --from main` with `ocr delegate rule --from main --format json <path...>`.
 
 ### Step 3: Get Diffs
 
@@ -61,19 +65,16 @@ Choose the diff command using the mode and refs from Step 1. Use `git --no-pager
 The diff commands disable external diff programs, text conversion, and color to produce plain patches.
 
 **Range mode** (merge_base provided in preview output):
-
 ```bash
 git --no-pager diff --no-ext-diff --no-textconv --no-color <merge_base>..<to> -- "<path>"
 ```
 
 **Commit mode**:
-
 ```bash
 git --no-pager show --no-ext-diff --no-textconv --no-color <commit> -- "<path>"
 ```
 
 **Workspace mode**:
-
 ```bash
 # Tracked files
 git --no-pager diff --no-ext-diff --no-textconv --no-color HEAD -- "<path>"
@@ -114,14 +115,14 @@ For large changes, review in bounded batches grouped by shared rules and diff si
 
 Each comment must follow this structure:
 
-| Field      | Type    | Required | Description                                                                    |
-| ---------- | ------- | -------- | ------------------------------------------------------------------------------ |
-| path       | string  | yes      | Relative file path                                                             |
-| content    | string  | yes      | Review comment describing the issue                                            |
-| start_line | integer | no       | Start line in the new file                                                     |
-| end_line   | integer | no       | End line in the new file                                                       |
-| category   | enum    | no       | bug, security, performance, maintainability, test, style, documentation, other |
-| severity   | enum    | no       | critical, high, medium, low                                                    |
+| Field | Type | Required | Description |
+|-------|------|----------|-------------|
+| path | string | yes | Relative file path |
+| content | string | yes | Review comment describing the issue |
+| start_line | integer | no | Start line in the new file |
+| end_line | integer | no | End line in the new file |
+| category | enum | no | bug, security, performance, maintainability, test, style, documentation, other |
+| severity | enum | no | critical, high, medium, low |
 
 ### Step 6: Classify and Report
 
@@ -138,31 +139,30 @@ Discard likely false positives silently.
 ### Step 7: Fix (Optional)
 
 If the user requested "review and fix":
-
 - Apply High/Critical fixes directly
 - Describe Medium fixes that require manual intervention
 - Skip Low-priority items unless trivial
 
 ## Sub-commands Reference
 
-| Command                       | Purpose                                   |
-| ----------------------------- | ----------------------------------------- |
-| `ocr delegate preview`        | Which files to review + mode/ref metadata |
-| `ocr delegate rule <path...>` | Review rules grouped by content           |
+| Command | Purpose |
+|---------|---------|
+| `ocr delegate preview` | Which files to review + mode/ref metadata |
+| `ocr delegate rule <path...>` | Review rules grouped by content |
 
 ## Shared Flags
 
-| Flag                           | Description                                                      |
-| ------------------------------ | ---------------------------------------------------------------- |
-| `--from <ref>`                 | Source ref for range mode                                        |
-| `--to <ref>`                   | Target ref for range mode                                        |
-| `-c, --commit <hash>`          | Single commit mode                                               |
-| `--repo <path>`                | Repository root (default: cwd)                                   |
-| `--rule <path>`                | Custom rule.json path                                            |
-| `--exclude <patterns>`         | Comma-separated exclude patterns                                 |
-| `-b, --background <text>`      | Business context                                                 |
+| Flag | Description |
+|------|-------------|
+| `--from <ref>` | Source ref for range mode |
+| `--to <ref>` | Target ref for range mode; defaults to `HEAD` when `--from` is supplied in either subcommand |
+| `-c, --commit <hash>` | Single commit mode |
+| `--repo <path>` | Repository root (default: cwd) |
+| `--rule <path>` | Custom rule.json path |
+| `--exclude <patterns>` | Comma-separated exclude patterns |
+| `-b, --background <text>` | Business context |
 | `-B, --background-file <path>` | Business context from Markdown file (takes precedence over `-b`) |
-| `-f, --format <text\|json>`    | Output format; use `json` for agent integrations                 |
+| `-f, --format <text\|json>` | Output format; use `json` for agent integrations |
 
 ## Gotchas
 
