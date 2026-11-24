@@ -1,5 +1,15 @@
 # Changelog
 
+## Unreleased
+
+### Added
+- Added guidance preserving informal voice and a closing verdict
+
+### Changed
+- Clarified Humanizer writing guidance and cited recent research
+
+### Fixed
+- Prevented duplicate pattern numbers from passing validation
 ## 4.0.0
 
 - The skill no longer forbids adding facts. Where the text is generic, it now adds a specific detail it knows to be true. It still keeps every claim the original made and treats a lost or changed claim as an error. This reverses the no-invention rule from 2.9.0. Patterns 14 and 17 follow the same change.

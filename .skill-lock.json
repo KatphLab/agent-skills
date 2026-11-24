@@ -21,6 +21,15 @@
       "installedAt": "2026-06-16T10:42:25.783Z",
       "updatedAt": "2026-10-27T07:16:16.363Z"
     },
+    "optimize-instructions": {
+      "source": "KatphLab/opencode-config",
+      "sourceType": "github",
+      "sourceUrl": "https://github.com/KatphLab/opencode-config.git",
+      "skillPath": "skills/optimize-instructions/SKILL.md",
+      "skillFolderHash": "8f9d7ec0fc882c17fe64945d7f0c741ac7b93474",
+      "installedAt": "2026-06-16T10:43:50.370Z",
+      "updatedAt": "2026-06-16T10:43:50.370Z"
+    },
     "open-code-review-delegate": {
       "source": "alibaba/open-code-review",
       "sourceType": "github",
