@@ -35,20 +35,20 @@
       "sourceType": "github",
       "sourceUrl": "https://github.com/alibaba/open-code-review.git",
       "skillPath": "skills/open-code-review-delegate/SKILL.md",
-      "skillFolderHash": "911c39ef05aba85ce9a19c65667edd2f7520a08a",
+      "skillFolderHash": "6c7a9c99a6b37ee032010c5190822662858de0aa",
       "installedAt": "2026-08-20T17:45:28.406Z",
-      "updatedAt": "2026-11-16T15:49:37.269Z",
-      "commit": "dd1a7e12a3565f5f7396acb394d83ab18102e6ce"
+      "updatedAt": "2026-11-24T09:36:05.798Z",
+      "commit": "f6379f71edba1e59dbc056e8f455df1f84396498"
     },
     "archify": {
       "source": "tt-a1i/archify",
       "sourceType": "github",
       "sourceUrl": "https://github.com/tt-a1i/archify.git",
       "skillPath": "archify/SKILL.md",
-      "skillFolderHash": "03645a096811664da641153a4a42e862c4a6bc62",
+      "skillFolderHash": "d3e9c89dd9510a64c1114d685b68ebf1887f135e",
       "installedAt": "2026-08-31T13:05:12.388Z",
-      "updatedAt": "2026-11-16T15:49:37.895Z",
-      "commit": "a7ed6fd6657da90414831d1d42cf95987188750c"
+      "updatedAt": "2026-11-24T09:36:07.791Z",
+      "commit": "3ca198d867ce4b616332f846ff66e5c8e5e60f95"
     },
     "create-readme": {
       "source": "github/awesome-copilot",
@@ -290,11 +290,11 @@
       "sourceType": "github",
       "sourceUrl": "https://github.com/blader/humanizer.git",
       "skillPath": "SKILL.md",
-      "skillFolderHash": "b48c832f0f809c1b5658edbb838c2521b72f2413",
+      "skillFolderHash": "a32f24407364c74c812b43c15926d638bee1e072",
       "pluginName": "humanizer",
       "installedAt": "2026-10-12T18:59:02.734Z",
-      "updatedAt": "2026-11-16T15:49:38.411Z",
-      "commit": "b48c832f0f809c1b5658edbb838c2521b72f2413"
+      "updatedAt": "2026-11-24T09:36:07.853Z",
+      "commit": "a32f24407364c74c812b43c15926d638bee1e072"
     },
     "implement-spec": {
       "source": "mattpocock/skills",
@@ -415,10 +415,20 @@
       "sourceType": "github",
       "sourceUrl": "https://github.com/pbakaus/impeccable.git",
       "skillPath": ".agents/skills/impeccable/SKILL.md",
-      "skillFolderHash": "8a24d1965ce33f4b519907bf98c9aaa323fffcb6",
+      "skillFolderHash": "c4298d9d001a41c9c2a3797fddee509bc4dd7ba0",
       "installedAt": "2026-10-31T10:41:05.662Z",
-      "updatedAt": "2026-11-16T15:49:38.628Z",
-      "commit": "d41d9860b0094dcb68030657da63461212835aaa"
+      "updatedAt": "2026-11-24T09:36:08.052Z",
+      "commit": "b49177d32788f2dc585c42831d845dacf1ebed2c"
+    },
+    "find-skills": {
+      "source": "vercel-labs/skills",
+      "sourceType": "github",
+      "sourceUrl": "https://github.com/vercel-labs/skills.git",
+      "commit": "57217cf86ba38148a57af9e90d14a4c049558330",
+      "skillPath": "skills/find-skills/SKILL.md",
+      "skillFolderHash": "76a98a285cb0434f3d39e1a873823556330e398b",
+      "installedAt": "2026-11-24T09:51:04.653Z",
+      "updatedAt": "2026-11-24T09:51:04.653Z"
     }
   },
   "dismissed": {
